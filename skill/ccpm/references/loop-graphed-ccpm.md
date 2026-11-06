@@ -1,8 +1,8 @@
-# Loop-Graphed — Run an Epic as a Graph of Checked Units
+# Loop-Graphed-CCPM — Run an Epic as a Graph of Checked Units
 
 This mode executes a synced epic end to end. Each open task is one unit. Each unit runs a Karpathy loop: make one change, measure it against a fixed check, keep it if it passes, revert it if it does not, log every attempt. GitHub is synced at every state change. The user approves only the final step.
 
-**Trigger**: "run the <name> epic with loop-graphed", "loop-graphed epic <name>", "execute <name> as checked units".
+**Trigger**: "/loop-graphed-ccpm <name>", "run the <name> epic with loop-graphed", "loop-graphed epic <name>", "execute <name> as checked units".
 
 ---
 

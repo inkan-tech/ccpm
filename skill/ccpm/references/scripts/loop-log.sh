@@ -8,7 +8,7 @@
 # <unit> = a task issue number, or MERGE, MERGE-partial, CHECK.
 # Line: ts, unit, attempt, change, check, exit, kept (exit == 0),
 # state = pass (0) | unverified (3) | fail (other) | none (--no-check), reason, skill (git SHA of
-# references/loop-graphed.md, "-dirty" if changed locally).
+# references/loop-graphed-ccpm.md, "-dirty" if changed locally).
 # A (unit, attempt) pair already logged is refused (exit 2): a correction is a new attempt.
 # A unit with 3 fail lines or 2 unverified lines is refused (exit 4): stop it, log MERGE-partial.
 # Each line is synced to GitHub by loop-sync.sh. A sync error never changes the exit code; it is
@@ -65,9 +65,9 @@ if [ $no_check -eq 0 ] && [ -f "$log" ]; then
 fi
 
 refs_dir=$(cd "$here/.." && pwd)
-skill_sha=$(git -C "$refs_dir" log -1 --format=%h -- loop-graphed.md 2>/dev/null)
+skill_sha=$(git -C "$refs_dir" log -1 --format=%h -- loop-graphed-ccpm.md 2>/dev/null)
 [ -n "$skill_sha" ] || skill_sha=uncommitted
-[ -n "$(git -C "$refs_dir" status --porcelain -- loop-graphed.md 2>/dev/null)" ] && skill_sha="$skill_sha-dirty"
+[ -n "$(git -C "$refs_dir" status --porcelain -- loop-graphed-ccpm.md 2>/dev/null)" ] && skill_sha="$skill_sha-dirty"
 
 # First attempt of a task: mark it in progress before the check runs.
 [ "$attempt" = 1 ] && [ $no_check -eq 0 ] && [[ $unit =~ ^[0-9]+$ ]] && bash "$here/loop-sync.sh" "$workdir" start "$unit"

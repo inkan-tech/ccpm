@@ -1,6 +1,6 @@
 ---
 name: ccpm
-description: "CCPM - spec-driven project management: PRD → Epic → GitHub Issues → parallel agents → shipped code. Use this skill for anything in the software delivery lifecycle: writing a PRD ('write a PRD for X', 'let's plan X', 'scope this out'), parsing a PRD into an epic, decomposing an epic into tasks, syncing to GitHub ('sync the X epic', 'push tasks to github'), starting work on an issue ('start working on issue N', 'let's work on issue N'), analyzing parallel work streams, running standups ('standup', 'run the standup'), checking status ('what's next', 'what's blocked', 'what are we working on'), closing issues, merging an epic, or running a synced epic end to end as a graph of checked units with live GitHub sync ('loop-graphed epic X', 'run the X epic with loop-graphed'). Use ccpm any time the user is talking about shipping a feature, managing work, or tracking progress — even if they don't say 'ccpm' or 'PRD'. Do NOT use for: debugging code, writing tests, reviewing PRs, or raw GitHub issue/PR operations with no delivery context."
+description: "CCPM - spec-driven project management: PRD → Epic → GitHub Issues → parallel agents → shipped code. Use this skill for anything in the software delivery lifecycle: writing a PRD ('write a PRD for X', 'let's plan X', 'scope this out'), parsing a PRD into an epic, decomposing an epic into tasks, syncing to GitHub ('sync the X epic', 'push tasks to github'), starting work on an issue ('start working on issue N', 'let's work on issue N'), analyzing parallel work streams, running standups ('standup', 'run the standup'), checking status ('what's next', 'what's blocked', 'what are we working on'), closing issues, merging an epic, or running a synced epic end to end as a graph of checked units with live GitHub sync ('/loop-graphed-ccpm X', 'run the X epic with loop-graphed'). Use ccpm any time the user is talking about shipping a feature, managing work, or tracking progress — even if they don't say 'ccpm' or 'PRD'. Do NOT use for: debugging code, writing tests, reviewing PRs, or raw GitHub issue/PR operations with no delivery context."
 ---
 
 # CCPM - Claude Code Project Manager
@@ -42,9 +42,9 @@ Before doing anything, read `references/conventions.md` for path standards, fron
 **Read**: `references/track.md`
 **Covers**: Status, standup, search, in-progress, next priority, blocked items, validation.
 
-### 6. Loop-Graphed — Run an epic as checked units
+### 6. Loop-Graphed-CCPM — Run an epic as checked units
 **When**: User wants a synced epic finished end to end with machine-checked pass conditions, approving only the final step.
-**Read**: `references/loop-graphed.md`
+**Read**: `references/loop-graphed-ccpm.md`
 **Covers**: Task graph from frontmatter, verifier-written check, Karpathy loop per task with attempt limits, GitHub sync at every state change, MERGE / MERGE-partial, cost-to-undo gate.
 
 ---
@@ -89,5 +89,5 @@ Check status:       "what's our status" / "standup"
 What's next:        "what should I work on next"
 Merge epic:         "merge the X epic"
 Report a bug:       "found a bug in issue 42" / "testing issue 42 revealed X"
-Loop-graphed run:   "loop-graphed epic X" / "run the X epic as checked units"
+Loop-graphed run:   "/loop-graphed-ccpm X" / "run the X epic as checked units"
 ```
