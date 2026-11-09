@@ -1,6 +1,6 @@
 ---
 name: ccpm
-description: "CCPM - spec-driven project management: PRD → Epic → GitHub Issues → parallel agents → shipped code. Use this skill for anything in the software delivery lifecycle: writing a PRD ('write a PRD for X', 'let's plan X', 'scope this out'), parsing a PRD into an epic, decomposing an epic into tasks, syncing to GitHub ('sync the X epic', 'push tasks to github'), starting work on an issue ('start working on issue N', 'let's work on issue N'), analyzing parallel work streams, running standups ('standup', 'run the standup'), checking status ('what's next', 'what's blocked', 'what are we working on'), closing issues, or merging an epic. Use ccpm any time the user is talking about shipping a feature, managing work, or tracking progress — even if they don't say 'ccpm' or 'PRD'. Do NOT use for: debugging code, writing tests, reviewing PRs, or raw GitHub issue/PR operations with no delivery context."
+description: "CCPM - spec-driven project management: PRD → Epic → GitHub Issues → parallel agents → shipped code. Use this skill for anything in the software delivery lifecycle: writing a PRD ('write a PRD for X', 'let's plan X', 'scope this out'), parsing a PRD into an epic, decomposing an epic into tasks, syncing to GitHub ('sync the X epic', 'push tasks to github'), starting work on an issue ('start working on issue N', 'let's work on issue N'), analyzing parallel work streams, running standups ('standup', 'run the standup'), checking status ('what's next', 'what's blocked', 'what are we working on'), closing issues, merging an epic, or running a synced epic end to end as a graph of checked units with live GitHub sync ('/loop-graphed-ccpm X', 'run the X epic with loop-graphed'). Use ccpm any time the user is talking about shipping a feature, managing work, or tracking progress — even if they don't say 'ccpm' or 'PRD'. Do NOT use for: debugging code, writing tests, reviewing PRs, or raw GitHub issue/PR operations with no delivery context."
 ---
 
 # CCPM - Claude Code Project Manager
@@ -15,7 +15,7 @@ Requirements live in files, not heads. Every feature starts as a PRD, becomes a 
 
 Before doing anything, read `references/conventions.md` for path standards, frontmatter schemas, and GitHub operation rules. These apply to all phases.
 
-## The Five Phases
+## The Six Phases
 
 ### 1. Plan — Capture requirements
 **When**: User wants to define a new feature, product requirement, or scope of work.
@@ -42,6 +42,11 @@ Before doing anything, read `references/conventions.md` for path standards, fron
 **Read**: `references/track.md`
 **Covers**: Status, standup, search, in-progress, next priority, blocked items, validation.
 
+### 6. Loop-Graphed-CCPM — Run an epic as checked units
+**When**: User wants a synced epic finished end to end with machine-checked pass conditions, approving only the final step.
+**Read**: `references/loop-graphed-ccpm.md`
+**Covers**: Task graph from frontmatter, verifier-written check, Karpathy loop per task with attempt limits, GitHub sync at every state change, MERGE / MERGE-partial, cost-to-undo gate.
+
 ---
 
 ## Script-First Rule
@@ -62,6 +67,9 @@ For deterministic operations — anything that reads and reports without needing
 | What's next | `bash references/scripts/next.sh` |
 | What's blocked | `bash references/scripts/blocked.sh` |
 | Validate project state | `bash references/scripts/validate.sh` |
+| Build loop-graphed graph | `bash references/scripts/loop-graph.sh <name>` |
+| Log + sync one attempt | `bash references/scripts/loop-log.sh <workdir> <N> <attempt> "<change>" -- <check>` |
+| Retry a failed sync | `bash references/scripts/loop-sync.sh <workdir> line <N>` |
 | Neon branch for an epic (optional) | `bash references/scripts/neon-branch.sh create <epic>` |
 | Remove that Neon branch on merge | `bash references/scripts/neon-branch.sh cleanup <epic>` |
 
@@ -81,4 +89,5 @@ Check status:       "what's our status" / "standup"
 What's next:        "what should I work on next"
 Merge epic:         "merge the X epic"
 Report a bug:       "found a bug in issue 42" / "testing issue 42 revealed X"
+Loop-graphed run:   "/loop-graphed-ccpm X" / "run the X epic as checked units"
 ```
