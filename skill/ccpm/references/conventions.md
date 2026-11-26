@@ -8,6 +8,7 @@ Read this before doing any file operations across all phases.
 
 ```
 .claude/
+├── project-board              # "<owner> <number>" of the GitHub Project board (project-board.sh)
 ├── prds/
 │   └── <feature-name>.md          # Product requirement documents
 ├── epics/
