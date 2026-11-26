@@ -112,6 +112,11 @@ completion: 0%
 
 Set `status: in-progress` and `updated: <datetime>` in the task file `.claude/epics/<epic>/<N>.md`.
 
+Move the issue on the GitHub Project board:
+```bash
+bash <skill_path>/references/scripts/project-board.sh status <N> "In Progress"
+```
+
 Create `.claude/epics/<epic>/updates/<N>/stream-<X>.md` for each stream:
 ```markdown
 ---
@@ -226,3 +231,21 @@ When multiple agents work in the same worktree simultaneously:
 - No `--force` flags ever.
 
 Shared files that commonly need coordination (types, config, package.json) should be handled by one designated stream; others pull after that commit.
+
+---
+
+## Linking Fabro Runs
+
+**Trigger**: A task is built by a [Fabro](https://github.com/inkan-tech/fabro) workflow run (`fabro run ...`). Fabro is optional. Both scripts exit 0 with a notice when the `fabro` CLI is missing.
+
+Link the run to the task issue. This posts the run id as an issue comment and sets the board card to `In Progress`:
+```bash
+bash <skill_path>/references/scripts/fabro-link.sh run <N> <run_id>
+```
+
+When the run (or you) opens the pull request, link it to the run. Put `Closes #<N>` in the PR body so GitHub links the PR to the issue and the board:
+```bash
+bash <skill_path>/references/scripts/fabro-link.sh pr <run_id> <pr_url>
+```
+
+Chain: board card → issue #N → comment with run id → Fabro run → PR (`Closes #N`).

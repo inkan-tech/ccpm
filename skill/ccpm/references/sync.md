@@ -89,6 +89,18 @@ fi
 
 Right after each issue is created, write `github: $task_url` into that task file (see Step 4). Do not wait for the whole batch.
 
+**Step 2b — Add every issue to the GitHub Project board:**
+
+The first call creates the board `CCPM: <repo>` and links it to the repo. It stores the board in `.claude/project-board`. Later calls reuse it. New items start in `Todo`.
+
+```bash
+bash <skill_path>/references/scripts/project-board.sh ensure
+bash <skill_path>/references/scripts/project-board.sh add <epic_number>
+bash <skill_path>/references/scripts/project-board.sh add <task_number>   # each task
+```
+
+If a call fails (for example the `project` scope is missing: `gh auth refresh -s project`), report the error to the user and go on. The issues already exist. Re-run `add` later.
+
 **Step 3 — Rename task files and update references:**
 
 After all issues are created, rename `001.md` → `<issue_number>.md` and update all `depends_on`/`conflicts_with` arrays to use real issue numbers (not sequential numbers).
@@ -127,6 +139,7 @@ This is a generated index, so it has no frontmatter. `validate.sh` does not chec
 ```markdown
 # GitHub Issue Mapping
 Epic: #<N> - https://github.com/<repo>/issues/<N>
+Board: https://github.com/orgs-or-users/<owner>/projects/<board_number>
 Tasks:
 - #<N>: <title> - https://github.com/<repo>/issues/<N>
 Synced: <datetime>
@@ -197,6 +210,7 @@ Add sync marker to local files to prevent duplicate comments:
 ```bash
 echo "✅ Task completed — all acceptance criteria met." | gh issue comment <N> --body-file -
 gh issue close <N>
+bash <skill_path>/references/scripts/project-board.sh status <N> Done
 ```
 4. Check off the task in the epic issue body:
 ```bash
@@ -249,6 +263,7 @@ mv .claude/epics/<name> .claude/epics/archived/
 # Close GitHub issues
 epic_issue=$(grep 'github:' .claude/epics/archived/<name>/epic.md | grep -oE '[0-9]+$')
 gh issue close $epic_issue -c "Epic completed and merged to main"
+bash <skill_path>/references/scripts/project-board.sh status $epic_issue Done
 ```
 
 Update epic.md frontmatter: `status: completed`.
@@ -333,3 +348,5 @@ The issue body should open with `Fixes / follow-up to #<original_N>` so GitHub a
 
 Start fixing it: "start working on issue <new_N>"
 ```
+
+Add the bug issue to the board: `bash <skill_path>/references/scripts/project-board.sh add <new_N>`.

@@ -30,12 +30,12 @@ Before doing anything, read `references/conventions.md` for path standards, fron
 ### 3. Sync — Push to GitHub
 **When**: Local epic/tasks need to become GitHub issues, progress needs to be posted as comments, or a bug is found and needs a linked issue created.
 **Read**: `references/sync.md`
-**Covers**: Epic sync (epic + tasks → GitHub issues), issue sync (progress comments), closing issues/epics, bug reporting against completed issues.
+**Covers**: Epic sync (epic + tasks → GitHub issues + GitHub Project board), issue sync (progress comments), closing issues/epics, bug reporting against completed issues.
 
 ### 4. Execute — Start building
 **When**: User wants to start working on one or more GitHub issues with parallel agents.
 **Read**: `references/execute.md`
-**Covers**: Issue analysis (parallel work stream identification), launching parallel agents, coordinating worktrees.
+**Covers**: Issue analysis (parallel work stream identification), launching parallel agents, coordinating worktrees, linking Fabro runs and PRs to issues.
 
 ### 5. Track — Know where things stand
 **When**: User asks for status, standup report, what's blocked, what's next, or needs to validate state.
@@ -70,6 +70,11 @@ For deterministic operations — anything that reads and reports without needing
 | Build loop-graphed graph | `bash references/scripts/loop-graph.sh <name>` |
 | Log + sync one attempt | `bash references/scripts/loop-log.sh <workdir> <N> <attempt> "<change>" -- <check>` |
 | Retry a failed sync | `bash references/scripts/loop-sync.sh <workdir> line <N>` |
+| Create or reuse the GitHub Project board | `bash references/scripts/project-board.sh ensure` |
+| Add an issue to the board | `bash references/scripts/project-board.sh add <N>` |
+| Set a board status | `bash references/scripts/project-board.sh status <N> "In Progress"` |
+| Link a Fabro run to an issue | `bash references/scripts/fabro-link.sh run <N> <run_id>` |
+| Link a PR to a Fabro run | `bash references/scripts/fabro-link.sh pr <run_id> <pr_url>` |
 | Neon branch for an epic (optional) | `bash references/scripts/neon-branch.sh create <epic>` |
 | Remove that Neon branch on merge | `bash references/scripts/neon-branch.sh cleanup <epic>` |
 
