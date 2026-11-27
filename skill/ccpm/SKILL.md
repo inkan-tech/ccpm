@@ -75,6 +75,7 @@ For deterministic operations — anything that reads and reports without needing
 | Set a board status | `bash references/scripts/project-board.sh status <N> "In Progress"` |
 | Link a Fabro run to an issue | `bash references/scripts/fabro-link.sh run <N> <run_id>` |
 | Link a PR to a Fabro run | `bash references/scripts/fabro-link.sh pr <run_id> <pr_url>` |
+| Fabro workflow for one task | copy `references/fabro/ccpm-work-task/` to `.fabro/workflows/`, then `fabro run ccpm-work-task --goal <N>` |
 | Neon branch for an epic (optional) | `bash references/scripts/neon-branch.sh create <epic>` |
 | Remove that Neon branch on merge | `bash references/scripts/neon-branch.sh cleanup <epic>` |
 

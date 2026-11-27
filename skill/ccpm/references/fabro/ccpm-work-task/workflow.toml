@@ -1,0 +1,34 @@
+_version = 1
+
+# Work one ccpm task issue to a PR with TDD.
+# Copy this folder to <repo>/.fabro/workflows/ccpm-work-task/, then:
+#   fabro run ccpm-work-task --goal <issue_number>
+
+[workflow]
+graph = "workflow.fabro"
+
+# Run in the local sandbox against the current clone.
+[run.environment]
+id = "local"
+
+[environments.local]
+provider = "local"
+
+# The `pr` node opens the PR itself with gh. Fabro's run-branch PR is off so the
+# two do not race. The hook below links that PR to the run (`fabro pr link`).
+[run.pull_request]
+enabled = false
+
+[run.integrations.github.permissions]
+contents = "write"
+pull_requests = "write"
+issues = "write"
+
+# After `claim`: comment the run id on the issue, move the board card to In Progress.
+# After `record_pr`: link the PR to the run.
+# CCPM_SKILL is the ccpm skill folder. Default: ~/.claude/skills/ccpm.
+[[run.hooks]]
+id = "ccpm-link"
+event = "stage_complete"
+matcher = "^(claim|record_pr)$"
+script = "bash \"${CCPM_SKILL:-$HOME/.claude/skills/ccpm}/references/scripts/fabro-hook.sh\""
