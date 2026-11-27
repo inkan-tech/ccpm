@@ -264,4 +264,5 @@ Stages: `claim` → plan → red → green → verify → `pr` → `record_pr`.
 - `claim` fails the run if the goal is not an issue number, and records it in the git dir.
 - A `stage_complete` hook runs `scripts/fabro-hook.sh` after `claim` (issue comment + board `In Progress`) and after `record_pr` (`fabro pr link`).
 - The hook finds the skill in `$CCPM_SKILL`, default `~/.claude/skills/ccpm`. Set it in `[environments.local.env]` when the Fabro host keeps the skill elsewhere.
-- The host needs `gh` with the `project` scope (`gh auth refresh -s project`).
+- Board access in a run: Fabro gives `gh` a GitHub App token (`GITHUB_TOKEN`). The workflow asks for `organization_projects = "write"`, so the Fabro GitHub App must have that permission, and the board must belong to an organization. Without the App token, `gh` uses the host login, which needs the `project` scope (`gh auth refresh -s project`).
+- The model is the Fabro server default. Pass `--model <id>` to change it.

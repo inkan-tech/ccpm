@@ -19,10 +19,14 @@ provider = "local"
 [run.pull_request]
 enabled = false
 
+# organization_projects moves the card on an organization-owned board. The
+# GitHub App must have that permission too. A GitHub App token cannot write a
+# user-owned board.
 [run.integrations.github.permissions]
 contents = "write"
 pull_requests = "write"
 issues = "write"
+organization_projects = "write"
 
 # After `claim`: comment the run id on the issue, move the board card to In Progress.
 # After `record_pr`: link the PR to the run.

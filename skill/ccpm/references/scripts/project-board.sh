@@ -17,8 +17,13 @@ NAME=${REPO##*/}
 
 die() { echo "❌ $*" >&2; exit 1; }
 
-gh auth status 2>&1 | grep -q "'project'" \
-  || die "gh token has no 'project' scope. Run: gh auth refresh -s project"
+# A gh login (OAuth) token needs the "project" scope. A GH_TOKEN/GITHUB_TOKEN
+# (for example the GitHub App token of a Fabro run) has no scopes to check:
+# its access comes from the App permission organization_projects.
+if [ -z "${GH_TOKEN:-}${GITHUB_TOKEN:-}" ]; then
+  gh auth status 2>&1 | grep -q "'project'" \
+    || die "gh token has no 'project' scope. Run: gh auth refresh -s project"
+fi
 
 board_number() {
   if [ -f "$STATE_FILE" ]; then
