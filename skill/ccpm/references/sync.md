@@ -25,6 +25,7 @@ REPO=$(echo "$remote_url" | sed 's|.*github.com[:/]||' | sed 's|\.git$||')
 **Trigger**: User wants to push a local epic and its tasks to GitHub as issues.
 
 ### Preflight
+
 - Verify `.claude/epics/<name>/epic.md` exists.
 - Verify numbered task files exist — if none: "❌ No tasks to sync. Decompose the epic first."
 
@@ -58,18 +59,13 @@ Write `github: $epic_url` into epic.md right away (see Step 4), so an interrupte
 
 Skip any task file that already has a `github:` URL — it was synced before. This makes a re-run after an interruption safe.
 
-Check if the `gh-sub-issue` extension is available:
-```bash
-use_subissues=false
-if gh extension list | grep -q "yahsan2/gh-sub-issue"; then
-  use_subissues=true
-fi
-```
+Link each task to the epic with the GitHub REST sub-issues API. It needs no gh extension. Do not depend on `gh sub-issue`: forks of that extension have different syntax (`inkan-tech/gh-sub-issue` takes `add <parent> --sub-issue-number <child>` and has no `--repo`), and a check on one owner name skips the link in silence. The API takes the child's numeric `id`, not its issue number.
 
 For <5 tasks: create sequentially.
 For ≥5 tasks: use parallel Task agents (3-4 tasks per batch). Each agent must use its own temp file (`mktemp`), never a shared path like `/tmp/task-body.md`.
 
 Per task:
+
 ```bash
 body_file=$(mktemp)
 strip_frontmatter <task_file> > "$body_file"
@@ -81,11 +77,13 @@ task_url=$(gh issue create \
 task_number=$(echo "$task_url" | grep -oE '[0-9]+$')
 rm -f "$body_file"
 
-# Link the task to the epic as a sub-issue
-if [ "$use_subissues" = true ]; then
-  gh sub-issue add "$epic_number" "$task_number" --repo "$REPO"
-fi
+# Link the task to the epic as a sub-issue. Report a failure; do not skip it in silence.
+task_id=$(gh api "repos/$REPO/issues/$task_number" --jq .id)
+gh api -X POST "repos/$REPO/issues/$epic_number/sub_issues" -F sub_issue_id="$task_id" >/dev/null \
+  || echo "⚠️ #$task_number not linked to epic #$epic_number"
 ```
+
+Check the links after the batch: `gh api "repos/$REPO/issues/$epic_number/sub_issues" --jq '[.[].number]'`.
 
 Right after each issue is created, write `github: $task_url` into that task file (see Step 4). Do not wait for the whole batch.
 
@@ -112,6 +110,7 @@ mv 001.md <new_num>.md
 ```
 
 **Step 4 — Update frontmatter:**
+
 ```bash
 current_date=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
 # Update github: and updated: fields in epic.md and each task file
@@ -122,6 +121,7 @@ rm <file>.bak
 ```
 
 **Step 5 — Create worktree for the epic:**
+
 ```bash
 git checkout main && git pull origin main
 git worktree add ../epic-<name> -b epic/<name>
@@ -136,6 +136,7 @@ bash <skill_path>/references/scripts/neon-branch.sh create <name>
 **Step 6 — Create github-mapping.md:**
 
 This is a generated index, so it has no frontmatter. `validate.sh` does not check it.
+
 ```markdown
 # GitHub Issue Mapping
 Epic: #<N> - https://github.com/<repo>/issues/<N>
@@ -146,6 +147,7 @@ Synced: <datetime>
 ```
 
 **Output:**
+
 ```
 ✅ Synced epic <name> to GitHub
   Epic: #<N>
@@ -161,6 +163,7 @@ Synced: <datetime>
 **Trigger**: User wants to sync local development progress to a GitHub issue as a comment.
 
 ### Preflight
+
 - Verify issue exists: `gh issue view <N> --json state`
 - Check `.claude/epics/*/updates/<N>/` exists with a `progress.md` file.
 - Check `last_sync` in progress.md — if synced <5 minutes ago, confirm before proceeding.
@@ -170,11 +173,13 @@ Synced: <datetime>
 Gather updates from `.claude/epics/<epic>/updates/<N>/` (progress.md, notes.md, commits.md).
 
 Format and post a comment:
+
 ```bash
 gh issue comment <N> --body-file /tmp/update-comment.md
 ```
 
 Comment format:
+
 ```markdown
 ## 🔄 Progress Update - <date>
 
@@ -192,6 +197,7 @@ Comment format:
 After posting: update `last_sync` in progress.md frontmatter, update `updated` in the task file.
 
 Add sync marker to local files to prevent duplicate comments:
+
 ```markdown
 <!-- SYNCED: <datetime> -->
 ```
@@ -207,19 +213,24 @@ Add sync marker to local files to prevent duplicate comments:
 1. Find the local task file (`.claude/epics/*/<N>.md`).
 2. Update frontmatter: `status: closed`, `updated: <now>`.
 3. Post completion comment:
+
 ```bash
 echo "✅ Task completed — all acceptance criteria met." | gh issue comment <N> --body-file -
 gh issue close <N>
 bash <skill_path>/references/scripts/project-board.sh status <N> Done
 ```
+
 4. Check off the task in the epic issue body:
+
 ```bash
 gh issue view <epic_N> --json body -q .body > /tmp/epic-body.md
 sed -i "s/- \[ \] #<N>/- [x] #<N>/" /tmp/epic-body.md
 gh issue edit <epic_N> --body-file /tmp/epic-body.md
 ```
+
 5. Recalculate and update epic progress: `progress = closed_tasks / total_tasks * 100`
 6. If this issue had its own Neon branch, delete just that child. No-op when Neon is not configured:
+
 ```bash
 bash <skill_path>/references/scripts/neon-branch.sh cleanup <epic_name> --issue <N>
 ```
@@ -231,6 +242,7 @@ bash <skill_path>/references/scripts/neon-branch.sh cleanup <epic_name> --issue 
 **Trigger**: User wants to merge a completed epic back to main.
 
 ### Preflight
+
 - Verify worktree `../epic-<name>` exists.
 - Check for uncommitted changes in the worktree — block if dirty.
 - Warn if any task issues are still open.
@@ -279,9 +291,11 @@ The workflow should stay automated: create a linked bug task without losing cont
 ### Process
 
 **Step 1 — Read the original issue for context:**
+
 ```bash
 gh issue view <original_N> --json title,body,labels
 ```
+
 Also read the local task file if it exists: `.claude/epics/*/<original_N>.md`
 
 **Step 2 — Create a local bug task file:**
@@ -325,6 +339,7 @@ Found while working on / testing issue #<original_N>: <original title>
 Save to `.claude/epics/<same_epic_as_original>/bug-<original_N>-<slug>.md`
 
 **Step 3 — Create a linked GitHub issue:**
+
 ```bash
 bug_url=$(gh issue create \
   --repo "$REPO" \
@@ -341,6 +356,7 @@ The issue body should open with `Fixes / follow-up to #<original_N>` so GitHub a
 **Step 4 — Update the local file** with the GitHub issue number and rename to `<new_N>.md`.
 
 **Output:**
+
 ```
 ✅ Bug issue created: #<new_N> — "Bug: <short description>"
   Linked to: #<original_N>
