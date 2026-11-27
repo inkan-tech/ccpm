@@ -249,3 +249,20 @@ bash <skill_path>/references/scripts/fabro-link.sh pr <run_id> <pr_url>
 ```
 
 Chain: board card → issue #N → comment with run id → Fabro run → PR (`Closes #N`).
+
+### Running a task with the bundled workflow
+
+`references/fabro/ccpm-work-task/` is a Fabro workflow that works one task issue to a PR with TDD and does both links above by itself. Install it once per repository, then run it with the issue number as the goal:
+```bash
+mkdir -p .fabro/workflows
+cp -R <skill_path>/references/fabro/ccpm-work-task .fabro/workflows/
+fabro validate ccpm-work-task
+fabro run ccpm-work-task --goal <N>
+```
+
+Stages: `claim` → plan → red → green → verify → `pr` → `record_pr`.
+- `claim` fails the run if the goal is not an issue number, and records it in the git dir.
+- A `stage_complete` hook runs `scripts/fabro-hook.sh` after `claim` (issue comment + board `In Progress`) and after `record_pr` (`fabro pr link`).
+- The hook finds the skill in `$CCPM_SKILL`, default `~/.claude/skills/ccpm`. Set it in `[environments.local.env]` when the Fabro host keeps the skill elsewhere.
+- Board access in a run: Fabro gives `gh` a GitHub App token (`GITHUB_TOKEN`). The workflow asks for `organization_projects = "write"`, so the Fabro GitHub App must have that permission, and the board must belong to an organization. Without the App token, `gh` uses the host login, which needs the `project` scope (`gh auth refresh -s project`).
+- The model is the Fabro server default. Pass `--model <id>` to change it.

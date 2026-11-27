@@ -1,0 +1,33 @@
+digraph CcpmWorkTask {
+    graph [
+        goal="Work a single ccpm task issue to a PR using TDD. Pass the issue number with --goal.",
+        stall_timeout="3600s"
+    ]
+    rankdir=LR
+
+    start [shape=Mdiamond, label="Start"]
+    exit  [shape=Msquare, label="Exit"]
+
+    claim [label="Claim issue", script="n={{ goal }}; case \"$n\" in ''|*[!0-9]*) echo \"goal must be a ccpm task issue number, got: $n\" >&2; exit 1;; esac; echo \"$n\" >\"$(git rev-parse --git-dir)/ccpm-fabro-issue\"; echo \"claimed #$n\""]
+
+    plan [label="Plan", prompt="The goal is a ccpm task issue number: {{ goal }}.\n\nFetch it: gh issue view {{ goal }} --json title,body,labels,comments\n\nRead the title, description, and acceptance criteria. Write plan.md with: a summary, the files to create/modify, the TDD approach, and a concrete list of test cases derived from the acceptance criteria. Respond with the path to plan.md."]
+
+    red [label="Red", prompt="Read plan.md. Write automated tests for the acceptance-criteria test cases using the project's existing test framework and conventions. Do NOT write production code yet. Run the test suite and confirm the NEW tests fail for the right reason. Respond with the test file paths and the failing test names."]
+
+    green [label="Green", prompt="Read plan.md and the failing tests. Implement the minimal production code to make the failing tests pass. Do NOT weaken or delete the tests. Run the new tests and confirm they pass. Respond with the list of files changed."]
+
+    verify [label="Verify", prompt="Run the FULL project test suite (and linters/build if the project defines them). If anything fails, fix the PRODUCTION code (never weaken tests) and re-run until the whole suite passes, or you are genuinely blocked. If it all passes, respond with exactly 'VERIFY: PASS' on the first line then a one-line summary. If blocked after reasonable attempts, respond with exactly 'VERIFY: BLOCKED' on the first line then the reason and failing output."]
+
+    pr [label="Open PR", prompt="Do not commit plan.md. Create a pull request for the current branch with `gh pr create`. The PR body MUST include the line 'Closes #{{ goal }}' and a concise summary of the changes and how they satisfy each acceptance criterion. If the Verify stage answered 'VERIFY: BLOCKED', open the PR with `--draft` and put the blocking reason first in the body. Respond with the PR URL."]
+
+    record_pr [label="Record PR", script="gh pr view --json url --jq .url > \"$(git rev-parse --git-dir)/ccpm-fabro-pr-url\" && cat \"$(git rev-parse --git-dir)/ccpm-fabro-pr-url\""]
+
+    start -> claim
+    claim -> plan
+    plan -> red [fidelity="summary:high"]
+    red -> green [fidelity="summary:high"]
+    green -> verify
+    verify -> pr
+    pr -> record_pr
+    record_pr -> exit
+}
