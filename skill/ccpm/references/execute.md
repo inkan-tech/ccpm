@@ -238,6 +238,13 @@ Shared files that commonly need coordination (types, config, package.json) shoul
 
 **Trigger**: A task is built by a [Fabro](https://github.com/inkan-tech/fabro) workflow run (`fabro run ...`). Fabro is optional. Both scripts exit 0 with a notice when the `fabro` CLI is missing.
 
+To start the run and link it in one step (issue title and body become the run goal, run id is commented on the issue):
+```bash
+bash <skill_path>/references/scripts/fabro-run-issue.sh <N> <workflow> [owner/repo]
+```
+
+To link a run that already exists:
+
 Link the run to the task issue. This posts the run id as an issue comment and sets the board card to `In Progress`:
 ```bash
 bash <skill_path>/references/scripts/fabro-link.sh run <N> <run_id>

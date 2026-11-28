@@ -73,6 +73,7 @@ For deterministic operations — anything that reads and reports without needing
 | Create or reuse the GitHub Project board | `bash references/scripts/project-board.sh ensure` |
 | Add an issue to the board | `bash references/scripts/project-board.sh add <N>` |
 | Set a board status | `bash references/scripts/project-board.sh status <N> "In Progress"` |
+| Start a Fabro run for an issue and link it | `bash references/scripts/fabro-run-issue.sh <N> <workflow> [owner/repo]` |
 | Link a Fabro run to an issue | `bash references/scripts/fabro-link.sh run <N> <run_id>` |
 | Link a PR to a Fabro run | `bash references/scripts/fabro-link.sh pr <run_id> <pr_url>` |
 | Neon branch for an epic (optional) | `bash references/scripts/neon-branch.sh create <epic>` |
