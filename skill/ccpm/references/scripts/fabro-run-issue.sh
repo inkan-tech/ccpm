@@ -3,7 +3,8 @@
 #   fabro-run-issue.sh <issue_number> <workflow> [target]
 #     workflow  Fabro workflow name (resolved from FABRO_PROJECT_DIR, default: current dir)
 #     target    OWNER/REPO[@BRANCH] the run works on (default: the git origin of the current dir)
-# Set FABRO_ENVIRONMENT to pick a server environment (a workflow.toml run.environment id is not honored by `fabro run`).
+# `fabro run` does not honor a workflow.toml run.environment id, so this script passes --environment itself.
+# FABRO_ENVIRONMENT overrides; otherwise the workflow's [run.environment] id is used.
 # The issue title and body become the run goal. The run id is printed, and
 # fabro-link.sh comments it on the issue and moves the board card to In Progress.
 set -euo pipefail
@@ -26,6 +27,12 @@ trap 'rm -f "$goal_file"' EXIT
 printf '\n\nResolve issue #%s. Put "Closes #%s" in the pull request body.\n' "$issue" "$issue" >> "$goal_file"
 
 cd "${FABRO_PROJECT_DIR:-.}"
+
+# Without --environment, fabro falls back to the server's "default" environment.
+# Default to the id in the workflow's [run.environment], unless FABRO_ENVIRONMENT is set.
+if [ -z "${FABRO_ENVIRONMENT:-}" ] && [ -f ".fabro/workflows/$workflow/workflow.toml" ]; then
+  FABRO_ENVIRONMENT=$(awk '/^\[run.environment\]/{f=1;next} /^\[/{f=0} f && /^id *=/{gsub(/[" ]/,"",$3); print $3; exit}' ".fabro/workflows/$workflow/workflow.toml")
+fi
 out=$(fabro run --detach --target "$target" --goal-file "$goal_file" \
   --label "ccpm_issue=$issue" ${FABRO_ENVIRONMENT:+--environment "$FABRO_ENVIRONMENT"} "$workflow")
 run_id=$(echo "$out" | grep -v '^[[:space:]]*$' | tail -1 | awk '{print $NF}')
